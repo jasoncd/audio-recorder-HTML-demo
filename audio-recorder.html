@@ -1,0 +1,103 @@
+<html>
+<head>
+<script>
+  
+var context;
+var myArrayBuffer;
+var stream;
+
+function recording()
+{
+
+  context = new AudioContext();
+  var source = context.createMediaStreamSource(stream);
+  var processor = context.createScriptProcessor(4096, 1, 1);
+  var buffer;
+  var cnt = 100;
+  var channels = 2;
+  var frameCount = context.sampleRate * 2.0;
+  myArrayBuffer = context.createBuffer(channels, frameCount, context.sampleRate);
+
+  source.connect(processor);
+  processor.connect(context.destination);
+
+  // const sleep = (milliseconds) => { return new Promise(resolve => setTimeout(resolve, milliseconds)) }
+
+  processor.onaudioprocess = function(e) 
+  {
+      if(cnt < 21)
+      {
+        buffer = e.inputBuffer.getChannelData(0);
+        for (var channel = 0; channel < channels; channel++)
+        {
+          var nowBuffering = myArrayBuffer.getChannelData(channel);
+          for (var i = 0; i < 4096; i++) 
+          { 
+            nowBuffering[i+cnt*4096] = buffer[i]; 
+          }
+        } 
+        
+        cnt++;
+      }
+      else
+      {
+        
+      }
+  };
+
+
+  var busy = 0;
+
+  var outerintv = setInterval(function()
+  {
+
+    if(busy == 0)
+    {
+      busy = 1;
+      cnt = 0;
+      var intv = setInterval(function() 
+      {
+          if(cnt > 19) 
+          {
+            alert(cnt);
+            var source2 = context.createBufferSource();
+            source2.buffer = myArrayBuffer;
+            source2.connect(context.destination);
+            source2.start();
+            clearInterval(intv);
+            busy = 0;
+          } 
+      }, 100);
+    }
+
+  }, 100);
+
+  //sleep(2000).then(() => {source2.stop()});
+
+}
+
+var save_stream = function(strm)
+{
+  stream = strm;
+}
+
+navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+     .then(save_stream); 
+
+</script>
+
+
+</head>
+
+<body>
+
+   <audio id="player" controls></audio>
+
+   <form>
+    <input type="button" value="Click to speak" onclick="recording()">
+   </form>
+
+
+</body>
+</html>
+
