@@ -2,12 +2,12 @@
 
 This demo shows how to use JavaScript to do audio recording in HTML.
 
-Features 
+**Features 
 
-  a
+  * a
 
 Simply load audio-recorder.html in a browswer, Enjoy!
 
-ToDo:
+**ToDo:
    
-   Add VAD
+  * Add VAD
